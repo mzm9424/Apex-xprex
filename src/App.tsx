@@ -26,8 +26,32 @@ import {
   User,
   Check,
   UploadCloud,
-  X
+  X,
+  Globe,
+  Compass,
+  Radio
 } from 'lucide-react';
+import shippingRouteMapImg from './assets/images/shipping_route_map_1790828892323.jpg';
+
+const CITY_COORDINATES: Record<string, { lat: string; lon: string; iata: string; elevation: string }> = {
+  Frankfurt: { lat: '50.0379° N', lon: '8.5622° E', iata: 'FRA', elevation: '111 m' },
+  Cairo: { lat: '30.1219° N', lon: '31.4056° E', iata: 'CAI', elevation: '116 m' },
+  Rotterdam: { lat: '51.9244° N', lon: '4.4777° E', iata: 'RTM', elevation: '0 m' },
+  Amsterdam: { lat: '52.3676° N', lon: '4.9041° E', iata: 'AMS', elevation: '-3 m' },
+  London: { lat: '51.5074° N', lon: '0.1278° W', iata: 'LHR', elevation: '25 m' },
+  Dubai: { lat: '25.2048° N', lon: '55.2708° E', iata: 'DXB', elevation: '19 m' },
+  Paris: { lat: '48.8566° N', lon: '2.3522° E', iata: 'CDG', elevation: '119 m' },
+  'New York': { lat: '40.6413° N', lon: '73.7781° W', iata: 'JFK', elevation: '4 m' },
+};
+
+function getCityCoords(cityName: string, fallbackLat: string = '50.0379° N', fallbackLon: string = '8.5622° E', fallbackIata: string = 'FRA') {
+  for (const [key, val] of Object.entries(CITY_COORDINATES)) {
+    if (cityName.toLowerCase().includes(key.toLowerCase())) {
+      return val;
+    }
+  }
+  return { lat: fallbackLat, lon: fallbackLon, iata: fallbackIata, elevation: '50 m' };
+}
 
 interface Stage {
   title: string;
@@ -347,6 +371,7 @@ export default function App() {
   const [activeCode, setActiveCode] = useState('DELI01474');
   const [activeTab, setActiveTab] = useState<'track' | 'result' | 'on_hold' | 'dispatcher'>('track');
   const [notification, setNotification] = useState<string | null>(null);
+  const [spotlightMode, setSpotlightMode] = useState<'route_map' | 'cargo_plane'>('route_map');
 
   // Dispatcher controls state
   const [dispatcherPin, setDispatcherPin] = useState('APEX-DISPATCH-990');
@@ -711,32 +736,56 @@ export default function App() {
 
             {/* Feature Cards Grid */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto pt-6">
-              <div className="bg-[#141618] border border-[#23272b] p-6 rounded-sm border-l-4 border-l-orange-500">
-                <Plane className="w-8 h-8 text-orange-500 mb-4" />
-                <h3 className="text-base font-bold text-white uppercase tracking-wide mb-2">
+              <div 
+                onClick={() => navigateTo('result', 'DELI01474')}
+                className="group bg-[#141618] border border-[#23272b] p-6 rounded-sm border-l-4 border-l-orange-500 transition-all duration-300 ease-out hover:scale-[1.03] hover:-translate-y-1 hover:shadow-xl hover:shadow-orange-500/10 hover:border-orange-500/40 cursor-pointer"
+              >
+                <div className="flex items-center justify-between mb-4">
+                  <Plane className="w-8 h-8 text-orange-500 transition-transform duration-300 ease-out group-hover:scale-110 group-hover:translate-x-1" />
+                  <span className="text-[10px] font-mono uppercase text-zinc-500 group-hover:text-orange-400/80 transition-colors flex items-center gap-1">
+                    Sample DELI01474 <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
+                  </span>
+                </div>
+                <h3 className="text-base font-bold text-white uppercase tracking-wide mb-2 group-hover:text-orange-400 transition-colors">
                   Air Cargo Fleet Transit
                 </h3>
-                <p className="text-xs text-zinc-400 leading-relaxed">
+                <p className="text-xs text-zinc-400 leading-relaxed group-hover:text-zinc-300 transition-colors">
                   Real-time simulated telemetry for high-priority parcels with transponder altitudes, flight numbers (APX-9481), and container ULD numbers.
                 </p>
               </div>
 
-              <div className="bg-[#141618] border border-[#23272b] p-6 rounded-sm border-l-4 border-l-amber-500">
-                <ShieldAlert className="w-8 h-8 text-amber-400 mb-4" />
-                <h3 className="text-base font-bold text-white uppercase tracking-wide mb-2">
+              <div 
+                onClick={() => navigateTo('on_hold', 'DELI08821')}
+                className="group bg-[#141618] border border-[#23272b] p-6 rounded-sm border-l-4 border-l-amber-500 transition-all duration-300 ease-out hover:scale-[1.03] hover:-translate-y-1 hover:shadow-xl hover:shadow-amber-500/10 hover:border-amber-500/40 cursor-pointer"
+              >
+                <div className="flex items-center justify-between mb-4">
+                  <ShieldAlert className="w-8 h-8 text-amber-400 transition-transform duration-300 ease-out group-hover:scale-110 group-hover:translate-x-1" />
+                  <span className="text-[10px] font-mono uppercase text-zinc-500 group-hover:text-amber-400/80 transition-colors flex items-center gap-1">
+                    Sample DELI08821 <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
+                  </span>
+                </div>
+                <h3 className="text-base font-bold text-white uppercase tracking-wide mb-2 group-hover:text-amber-400 transition-colors">
                   Cairo Port Customs Protocol
                 </h3>
-                <p className="text-xs text-zinc-400 leading-relaxed">
+                <p className="text-xs text-zinc-400 leading-relaxed group-hover:text-zinc-300 transition-colors">
                   Specialized detention notice handling for packages held in Egypt (CAI Terminal 2) with consignee document submission and clearance resolution.
                 </p>
               </div>
 
-              <div className="bg-[#141618] border border-[#23272b] p-6 rounded-sm border-l-4 border-l-white">
-                <FileText className="w-8 h-8 text-white mb-4" />
-                <h3 className="text-base font-bold text-white uppercase tracking-wide mb-2">
+              <div 
+                onClick={() => navigateTo('result', 'DELI01474')}
+                className="group bg-[#141618] border border-[#23272b] p-6 rounded-sm border-l-4 border-l-white transition-all duration-300 ease-out hover:scale-[1.03] hover:-translate-y-1 hover:shadow-xl hover:shadow-white/10 hover:border-zinc-500 cursor-pointer"
+              >
+                <div className="flex items-center justify-between mb-4">
+                  <FileText className="w-8 h-8 text-white transition-transform duration-300 ease-out group-hover:scale-110 group-hover:translate-x-1" />
+                  <span className="text-[10px] font-mono uppercase text-zinc-500 group-hover:text-zinc-300 transition-colors flex items-center gap-1">
+                    Waybill Specs <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
+                  </span>
+                </div>
+                <h3 className="text-base font-bold text-white uppercase tracking-wide mb-2 group-hover:text-zinc-200 transition-colors">
                   Verified Waybill & Specs
                 </h3>
-                <p className="text-xs text-zinc-400 leading-relaxed">
+                <p className="text-xs text-zinc-400 leading-relaxed group-hover:text-zinc-300 transition-colors">
                   Every parcel includes full dimensional specs, piece count, declared value in USD, verified shipper and recipient information.
                 </p>
               </div>
@@ -849,56 +898,197 @@ export default function App() {
 
             {/* Two-Column Details */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-              {/* Left Column: Plane Visual & Audit Timeline (7 cols) */}
+              {/* Left Column: Branded Route Map Spotlight & Audit Timeline (7 cols) */}
               <div className="lg:col-span-7 space-y-6">
-                {/* Freight Aircraft Image Spotlight */}
-                <div className="bg-[#141618] border border-[#23272b] rounded-sm overflow-hidden">
-                  <div className="relative h-60 w-full bg-[#181a1d]">
-                    <img
-                      src="/images/logistics_cargo_plane.jpg"
-                      alt="Apex Air Freight Cargo Plane in Transit"
-                      referrerPolicy="no-referrer"
-                      className="w-full h-full object-cover object-center filter brightness-90"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#141618] via-transparent to-black/40"></div>
-                    <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between text-xs">
-                      <div className="bg-black/85 backdrop-blur-md px-3 py-1.5 rounded border border-orange-500/40 text-orange-400 font-mono font-semibold">
-                        Flight APX-9481 &middot; Cruising FL380
-                      </div>
-                      <div className="bg-black/85 backdrop-blur-md px-3 py-1.5 rounded border border-zinc-700 text-zinc-300 font-mono">
-                        Container: ULD-APX-9941B
-                      </div>
-                    </div>
-                  </div>
+                {/* Global Shipping Route Map & Freight Visual Spotlight */}
+                {(() => {
+                  const originCoords = getCityCoords(currentParcel.origin.city, '50.0379° N', '8.5622° E', 'FRA');
+                  const destCoords = getCityCoords(currentParcel.destination.city, '30.1219° N', '31.4056° E', 'CAI');
 
-                  <div className="p-6">
-                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 text-xs">
-                      <div>
-                        <span className="text-zinc-500 block uppercase font-semibold text-[10px]">Origin Port</span>
-                        <span className="text-white font-bold text-sm block mt-0.5">
-                          {currentParcel.origin.city}, {currentParcel.origin.country}
-                        </span>
-                        <span className="text-zinc-400 font-mono text-[11px]">{currentParcel.origin.facility}</span>
+                  return (
+                    <div className="bg-[#141618] border border-[#23272b] rounded-sm overflow-hidden shadow-2xl border-t-2 border-t-orange-500">
+                      {/* Spotlight Header with Live Radar Status & Interactive View Switcher */}
+                      <div className="px-4 sm:px-5 py-3.5 bg-[#101214] border-b border-[#23272b] flex flex-wrap items-center justify-between gap-3">
+                        <div className="flex items-center gap-2">
+                          <span className="w-2.5 h-2.5 rounded-full bg-orange-500 animate-ping"></span>
+                          <span className="text-xs font-mono font-bold uppercase tracking-wider text-orange-400 flex items-center gap-1.5">
+                            <Globe className="w-3.5 h-3.5" />
+                            <span>Global Shipping Route</span>
+                          </span>
+                          <span className="hidden sm:inline text-zinc-600">|</span>
+                          <span className="hidden sm:inline text-[11px] font-mono text-zinc-400">
+                            {originCoords.iata} &rarr; {destCoords.iata}
+                          </span>
+                        </div>
+
+                        <div className="flex items-center gap-1.5 bg-[#0a0b0d] p-1 rounded border border-[#262a30]">
+                          <button
+                            type="button"
+                            onClick={() => setSpotlightMode('route_map')}
+                            className={`px-3 py-1 text-[11px] font-mono font-bold rounded-sm transition-all flex items-center gap-1.5 cursor-pointer ${
+                              spotlightMode === 'route_map'
+                                ? 'bg-orange-500 text-black shadow'
+                                : 'text-zinc-400 hover:text-white'
+                            }`}
+                          >
+                            <Compass className="w-3 h-3" />
+                            <span>Route Map</span>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setSpotlightMode('cargo_plane')}
+                            className={`px-3 py-1 text-[11px] font-mono font-bold rounded-sm transition-all flex items-center gap-1.5 cursor-pointer ${
+                              spotlightMode === 'cargo_plane'
+                                ? 'bg-orange-500 text-black shadow'
+                                : 'text-zinc-400 hover:text-white'
+                            }`}
+                          >
+                            <Plane className="w-3 h-3" />
+                            <span>Cargo Aircraft</span>
+                          </button>
+                        </div>
                       </div>
-                      <div>
-                        <span className="text-zinc-500 block uppercase font-semibold text-[10px]">
-                          Destination Hub
-                        </span>
-                        <span className="text-white font-bold text-sm block mt-0.5">
-                          {currentParcel.destination.city}, {currentParcel.destination.country}
-                        </span>
-                        <span className="text-zinc-400 font-mono text-[11px]">{currentParcel.destination.address}</span>
+
+                      {/* Branded Map / Aircraft Display */}
+                      <div className="relative h-72 sm:h-84 w-full bg-[#0a0b0d] overflow-hidden group">
+                        {spotlightMode === 'route_map' ? (
+                          <>
+                            <img
+                              src={shippingRouteMapImg}
+                              alt={`Global Shipping Route Map from ${currentParcel.origin.city} (${originCoords.lat}) to ${currentParcel.destination.city} (${destCoords.lat})`}
+                              referrerPolicy="no-referrer"
+                              className="w-full h-full object-cover object-center filter brightness-95 contrast-105 group-hover:scale-105 transition-transform duration-700 ease-out"
+                            />
+                            <div className="absolute inset-0 bg-gradient-to-t from-[#141618] via-transparent to-black/60 pointer-events-none"></div>
+
+                            {/* Top Telemetry Overlay */}
+                            <div className="absolute top-3 left-3 right-3 sm:top-4 sm:left-4 sm:right-4 flex flex-wrap items-center justify-between gap-2 pointer-events-none">
+                              <div className="bg-black/85 backdrop-blur-md px-3 py-1.5 rounded-sm border border-orange-500/50 text-orange-400 font-mono text-[11px] flex items-center gap-2 shadow-lg">
+                                <Radio className="w-3 h-3 animate-pulse text-orange-400" />
+                                <span>VECTOR: {originCoords.iata} ({originCoords.lat}) &rarr; {destCoords.iata} ({destCoords.lat})</span>
+                              </div>
+                              <div className="bg-black/85 backdrop-blur-md px-2.5 py-1 rounded-sm border border-zinc-700 text-zinc-300 font-mono text-[11px] shadow-lg">
+                                APX-9481 &middot; FL380
+                              </div>
+                            </div>
+
+                            {/* Bottom Waypoint HUD Cards */}
+                            <div className="absolute bottom-3 left-3 right-3 sm:bottom-4 sm:left-4 sm:right-4 flex flex-wrap items-center justify-between gap-3 text-xs pointer-events-none">
+                              <div className="bg-black/90 backdrop-blur-md px-3.5 py-2 rounded-sm border-l-4 border-l-orange-500 border border-[#2b3036] text-white font-mono shadow-xl">
+                                <span className="text-[9px] text-orange-400 uppercase tracking-widest block font-bold">
+                                  Origin Coordinates
+                                </span>
+                                <div className="font-bold text-xs flex items-center gap-1.5 mt-0.5">
+                                  <MapPin className="w-3 h-3 text-orange-500" />
+                                  <span>{currentParcel.origin.city} ({originCoords.iata})</span>
+                                </div>
+                                <span className="text-[10px] text-zinc-400 font-mono block">
+                                  {originCoords.lat}, {originCoords.lon}
+                                </span>
+                              </div>
+
+                              <div className="bg-black/90 backdrop-blur-md px-3.5 py-2 rounded-sm border-l-4 border-l-amber-500 border border-[#2b3036] text-white font-mono shadow-xl text-right">
+                                <span className="text-[9px] text-amber-400 uppercase tracking-widest block font-bold">
+                                  Destination Coordinates
+                                </span>
+                                <div className="font-bold text-xs flex items-center justify-end gap-1.5 mt-0.5">
+                                  <span>{currentParcel.destination.city} ({destCoords.iata})</span>
+                                  <MapPin className="w-3 h-3 text-amber-400" />
+                                </div>
+                                <span className="text-[10px] text-zinc-400 font-mono block">
+                                  {destCoords.lat}, {destCoords.lon}
+                                </span>
+                              </div>
+                            </div>
+                          </>
+                        ) : (
+                          <>
+                            <img
+                              src="/images/logistics_cargo_plane.jpg"
+                              alt="Apex Air Freight Cargo Plane in Transit"
+                              referrerPolicy="no-referrer"
+                              className="w-full h-full object-cover object-center filter brightness-90 group-hover:scale-105 transition-transform duration-700 ease-out"
+                            />
+                            <div className="absolute inset-0 bg-gradient-to-t from-[#141618] via-transparent to-black/40 pointer-events-none"></div>
+                            <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between text-xs">
+                              <div className="bg-black/85 backdrop-blur-md px-3 py-1.5 rounded border border-orange-500/40 text-orange-400 font-mono font-semibold">
+                                Flight APX-9481 &middot; Cruising FL380
+                              </div>
+                              <div className="bg-black/85 backdrop-blur-md px-3 py-1.5 rounded border border-zinc-700 text-zinc-300 font-mono">
+                                Container: ULD-APX-9941B
+                              </div>
+                            </div>
+                          </>
+                        )}
                       </div>
-                      <div>
-                        <span className="text-zinc-500 block uppercase font-semibold text-[10px]">Air Transit Type</span>
-                        <span className="text-orange-400 font-bold text-sm block mt-0.5 font-mono">
-                          Direct Airway Express
-                        </span>
-                        <span className="text-zinc-400 text-[11px]">Clearance Pre-Approved</span>
+
+                      {/* Geolocation & Telemetry Specs Grid */}
+                      <div className="p-4 sm:p-5 bg-[#121416] border-t border-[#23272b]">
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs font-mono">
+                          <div className="p-2.5 bg-[#0d0e10] rounded-sm border border-[#22262a]">
+                            <span className="text-zinc-500 block uppercase font-bold text-[9px] tracking-wider">
+                              Origin Waypoint
+                            </span>
+                            <span className="text-white font-bold text-xs block mt-1">
+                              {originCoords.iata} ({currentParcel.origin.city})
+                            </span>
+                            <span className="text-orange-400 text-[10px] block mt-0.5">
+                              {originCoords.lat}
+                            </span>
+                            <span className="text-zinc-400 text-[10px] block">
+                              {originCoords.lon}
+                            </span>
+                          </div>
+
+                          <div className="p-2.5 bg-[#0d0e10] rounded-sm border border-[#22262a]">
+                            <span className="text-zinc-500 block uppercase font-bold text-[9px] tracking-wider">
+                              Destination Gateway
+                            </span>
+                            <span className="text-white font-bold text-xs block mt-1">
+                              {destCoords.iata} ({currentParcel.destination.city})
+                            </span>
+                            <span className="text-amber-400 text-[10px] block mt-0.5">
+                              {destCoords.lat}
+                            </span>
+                            <span className="text-zinc-400 text-[10px] block">
+                              {destCoords.lon}
+                            </span>
+                          </div>
+
+                          <div className="p-2.5 bg-[#0d0e10] rounded-sm border border-[#22262a]">
+                            <span className="text-zinc-500 block uppercase font-bold text-[9px] tracking-wider">
+                              Great Circle Range
+                            </span>
+                            <span className="text-white font-bold text-xs block mt-1">
+                              2,912 km (1,572 NM)
+                            </span>
+                            <span className="text-emerald-400 text-[10px] block mt-0.5">
+                              Direct Airway Path
+                            </span>
+                            <span className="text-zinc-400 text-[10px] block">
+                              Bearing 138° SE
+                            </span>
+                          </div>
+
+                          <div className="p-2.5 bg-[#0d0e10] rounded-sm border border-[#22262a]">
+                            <span className="text-zinc-500 block uppercase font-bold text-[9px] tracking-wider">
+                              Airspace Radar
+                            </span>
+                            <span className="text-orange-400 font-bold text-xs block mt-1">
+                              Flight APX-9481
+                            </span>
+                            <span className="text-zinc-300 text-[10px] block mt-0.5">
+                              Altitude FL380
+                            </span>
+                            <span className="text-emerald-400 text-[10px] block">
+                              Transponder Verified
+                            </span>
+                          </div>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </div>
+                  );
+                })()}
 
                 {/* Milestone Audit Trail */}
                 <div className="bg-[#141618] border border-[#23272b] rounded-sm p-6">

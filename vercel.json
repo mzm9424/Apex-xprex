@@ -1,5 +1,31 @@
 {
+  "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": "vite",
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "cleanUrls": true,
+  "redirects": [
+    {
+      "source": "/track.html",
+      "destination": "/",
+      "permanent": true
+    },
+    {
+      "source": "/track",
+      "destination": "/#track",
+      "permanent": false
+    },
+    {
+      "source": "/result.html",
+      "destination": "/#result",
+      "permanent": false
+    },
+    {
+      "source": "/on-hold.html",
+      "destination": "/#on-hold",
+      "permanent": false
+    }
+  ],
   "rewrites": [
     {
       "source": "/((?!.*\\..*).*)",
